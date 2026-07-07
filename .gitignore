@@ -1,0 +1,25 @@
+# Secrets & local config
+.env
+
+# Telethon session files (contain your account login!)
+*.session
+*.session-journal
+sessions/
+
+# Local database
+*.db
+*.sqlite3
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/

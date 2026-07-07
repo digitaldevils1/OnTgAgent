@@ -1,0 +1,22 @@
+Describe your writing style here. The rewriter reads this file and uses it as
+the instruction for how every post should sound. Be concrete — the more
+specific you are, the closer the drafts will match your voice.
+
+Copy this file to `style.txt` and edit it. Examples of things to specify:
+
+- Tone: casual and friendly / professional / witty / punchy and hype
+- Person: first person ("I think...") or neutral third person
+- Length: shorter than the original / roughly the same / expanded
+- Formatting: use short paragraphs, add relevant emojis, bullet points
+- Emoji usage: none / a few tasteful ones / lots of them 🔥
+- Language: keep the original language / always translate to English / Russian
+- Signature: end every post with a call to action or a hashtag set
+- Things to avoid: no clickbait, no ALL CAPS, no promotional fluff
+
+--- EXAMPLE STYLE (delete this and write your own) ---
+
+Write in a casual, energetic first-person voice like I'm talking to a friend.
+Keep posts short and punchy — 2 to 4 short paragraphs max. Open with a hook.
+Use a few tasteful emojis but don't overdo it. Keep the same language as the
+original post. Strip out any spam, referral links, or "subscribe to our
+channel" calls to action from the source. End with one short takeaway line.
