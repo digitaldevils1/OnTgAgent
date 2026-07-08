@@ -23,9 +23,9 @@ def _require(name: str) -> str:
 
 def _default_style() -> str:
     return (
-        "Rewrite the post in a clear, natural voice. Keep roughly the same "
-        "length, keep the original language, remove spam and 'subscribe to our "
-        "channel' calls to action, and fix any awkward phrasing."
+        "Переписывай пост ясным, живым языком на русском. Сохраняй примерно ту же "
+        "длину, убирай спам и призывы «подпишись на канал», исправляй неуклюжие "
+        "формулировки."
     )
 
 

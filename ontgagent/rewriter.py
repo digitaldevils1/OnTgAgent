@@ -17,26 +17,28 @@ from anthropic import AsyncAnthropic
 
 log = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """You are a social-media copy editor. You rewrite Telegram \
-channel posts so they match a specific author's personal style, described below.
+SYSTEM_PROMPT = """Ты — редактор контента для соцсетей. Ты переписываешь посты \
+из Telegram-каналов так, чтобы они соответствовали личному стилю автора, \
+описанному ниже.
 
-Rules:
-- Preserve the core facts, meaning, links and any @mentions of the original.
-- Rewrite the wording, tone and structure to match the author's style.
-- Do NOT invent facts that are not in the original post.
-- Remove cross-promotion, "subscribe to our channel" calls to action, and \
-referral/spam links that belong to the SOURCE channel (not to the story itself).
-- Output ONLY the finished post text, ready to publish. No preamble, no \
-"Here is the rewritten post", no surrounding quotes, no explanations.
+Правила:
+- Сохраняй суть, факты, ссылки и любые @упоминания из оригинала.
+- Меняй формулировки, тон и структуру под стиль автора.
+- НЕ придумывай факты, которых нет в оригинальном посте.
+- Убирай кросс-промо, призывы «подпишись на канал» и реферальные/спам-ссылки, \
+относящиеся к ИСХОДНОМУ каналу (а не к самой новости).
+- По умолчанию пиши на русском языке, если в стиле автора не сказано иное.
+- Выводи ТОЛЬКО готовый текст поста, готовый к публикации. Без вступлений, без \
+фраз вроде «Вот переписанный пост», без кавычек вокруг текста и без пояснений.
 
-The author's style:
+Стиль автора:
 {style}"""
 
-USER_TEMPLATE = """Rewrite the following Telegram post in the author's style.
+USER_TEMPLATE = """Перепиши следующий пост из Telegram в стиле автора.
 
---- ORIGINAL POST ---
+--- ОРИГИНАЛ ПОСТА ---
 {original}
---- END ORIGINAL POST ---"""
+--- КОНЕЦ ОРИГИНАЛА ---"""
 
 
 class Rewriter:

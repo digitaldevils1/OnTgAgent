@@ -1,6 +1,6 @@
-"""The confirmation bot: DMs you each rewritten draft with approve / edit /
-reject buttons, handles channel management commands, and publishes approved
-posts to your target channel.
+"""Бот подтверждения: присылает вам каждый переписанный черновик с кнопками
+одобрить / изменить / отклонить, обрабатывает команды управления каналами и
+публикует одобренные посты в ваш целевой канал.
 """
 
 from __future__ import annotations
@@ -25,17 +25,17 @@ log = logging.getLogger(__name__)
 
 HELP = (
     "🤖 <b>OnTgAgent</b>\n\n"
-    "I watch the channels you add, rewrite their newest posts in your style, "
-    "and send each draft here for you to approve.\n\n"
-    "<b>Commands</b>\n"
-    "/add <code>@channel</code> — start monitoring a channel\n"
-    "/remove <code>@channel</code> — stop monitoring a channel\n"
-    "/list — show monitored channels\n"
-    "/help — show this message\n\n"
-    "When a draft arrives, use the buttons:\n"
-    "✅ Approve — publish it (or mark it approved)\n"
-    "✏️ Edit — send me corrected text\n"
-    "❌ Reject — discard it"
+    "Я слежу за каналами, которые вы добавите, переписываю их свежие посты "
+    "в вашем стиле и присылаю каждый черновик сюда на подтверждение.\n\n"
+    "<b>Команды</b>\n"
+    "/add <code>@канал</code> — начать следить за каналом\n"
+    "/remove <code>@канал</code> — перестать следить за каналом\n"
+    "/list — показать список каналов\n"
+    "/help — показать это сообщение\n\n"
+    "Когда приходит черновик, используйте кнопки:\n"
+    "✅ Одобрить — опубликовать (или отметить одобренным)\n"
+    "✏️ Изменить — прислать свой вариант текста\n"
+    "❌ Отклонить — удалить черновик"
 )
 
 
@@ -44,13 +44,13 @@ def _draft_keyboard(draft_id: int) -> InlineKeyboardMarkup:
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="✅ Approve", callback_data=f"approve:{draft_id}"
+                    text="✅ Одобрить", callback_data=f"approve:{draft_id}"
                 ),
                 InlineKeyboardButton(
-                    text="✏️ Edit", callback_data=f"edit:{draft_id}"
+                    text="✏️ Изменить", callback_data=f"edit:{draft_id}"
                 ),
                 InlineKeyboardButton(
-                    text="❌ Reject", callback_data=f"reject:{draft_id}"
+                    text="❌ Отклонить", callback_data=f"reject:{draft_id}"
                 ),
             ]
         ]
@@ -60,10 +60,7 @@ def _draft_keyboard(draft_id: int) -> InlineKeyboardMarkup:
 def _format_draft(draft: Draft, channel_title: str | None) -> str:
     source = html.escape(channel_title or draft.channel)
     body = html.escape(draft.rewritten)
-    return (
-        f"📝 <b>Draft #{draft.id}</b> — from <b>{source}</b>\n\n"
-        f"{body}"
-    )
+    return f"📝 <b>Черновик #{draft.id}</b> — из <b>{source}</b>\n\n{body}"
 
 
 class ConfirmationBot:
@@ -73,19 +70,19 @@ class ConfirmationBot:
         self.reader = reader
         self.bot = Bot(token=config.bot_token)
         self.dp = Dispatcher()
-        # owner_id -> draft_id currently being edited
+        # owner_id -> draft_id, который сейчас редактируется
         self.awaiting_edit: dict[int, int] = {}
         self._register()
 
-    # --- guards -------------------------------------------------------------
+    # --- проверки -----------------------------------------------------------
 
     def _is_owner(self, user_id: int | None) -> bool:
         return user_id == self.config.owner_id
 
-    # --- public API used by the poll loop -----------------------------------
+    # --- публичный метод для цикла опроса ------------------------------------
 
     async def send_draft(self, draft: Draft) -> None:
-        """Send a freshly created draft to the owner for approval."""
+        """Отправить свежесозданный черновик владельцу на подтверждение."""
         title = None
         rows = await self.db.list_channels()
         for row in rows:
@@ -101,9 +98,9 @@ class ConfirmationBot:
                 disable_web_page_preview=True,
             )
         except Exception as exc:  # noqa: BLE001
-            log.exception("Failed to send draft %s: %s", draft.id, exc)
+            log.exception("Не удалось отправить черновик %s: %s", draft.id, exc)
 
-    # --- handler registration ----------------------------------------------
+    # --- регистрация обработчиков -------------------------------------------
 
     def _register(self) -> None:
         router = Router()
@@ -122,27 +119,27 @@ class ConfirmationBot:
             arg = _command_arg(message.text)
             if not arg:
                 await message.answer(
-                    "Usage: <code>/add @channel</code>", parse_mode="HTML"
+                    "Использование: <code>/add @канал</code>", parse_mode="HTML"
                 )
                 return
             title = await self.reader.resolve_title(arg)
             if title is None:
                 await message.answer(
-                    "❌ I couldn't access that channel. Make sure your account "
-                    "is subscribed to it and the name is correct."
+                    "❌ Не получилось открыть этот канал. Убедитесь, что ваш "
+                    "аккаунт подписан на него и название указано верно."
                 )
                 return
             added = await self.db.add_channel(arg, title)
             if added:
                 await message.answer(
-                    f"✅ Now monitoring <b>{html.escape(title)}</b>.\n"
-                    f"I'll send you the latest post shortly.",
+                    f"✅ Теперь слежу за <b>{html.escape(title)}</b>.\n"
+                    f"Скоро пришлю последний пост.",
                     parse_mode="HTML",
                 )
             else:
                 await self.db.set_channel_title(arg, title)
                 await message.answer(
-                    f"ℹ️ Already monitoring <b>{html.escape(title)}</b>.",
+                    f"ℹ️ Уже слежу за <b>{html.escape(title)}</b>.",
                     parse_mode="HTML",
                 )
 
@@ -153,12 +150,14 @@ class ConfirmationBot:
             arg = _command_arg(message.text)
             if not arg:
                 await message.answer(
-                    "Usage: <code>/remove @channel</code>", parse_mode="HTML"
+                    "Использование: <code>/remove @канал</code>", parse_mode="HTML"
                 )
                 return
             removed = await self.db.remove_channel(arg)
             await message.answer(
-                "🗑️ Stopped monitoring it." if removed else "That channel isn't on the list."
+                "🗑️ Перестал следить за ним."
+                if removed
+                else "Этого канала нет в списке."
             )
 
         @router.message(Command("list"))
@@ -167,12 +166,16 @@ class ConfirmationBot:
                 return
             rows = await self.db.list_channels()
             if not rows:
-                await message.answer("No channels yet. Add one with /add @channel")
+                await message.answer(
+                    "Пока нет каналов. Добавьте: /add @канал"
+                )
                 return
-            lines = ["<b>Monitored channels:</b>"]
+            lines = ["<b>Отслеживаемые каналы:</b>"]
             for row in rows:
                 name = html.escape(row["title"] or row["identifier"])
-                lines.append(f"• {name} (<code>{html.escape(row['identifier'])}</code>)")
+                lines.append(
+                    f"• {name} (<code>{html.escape(row['identifier'])}</code>)"
+                )
             await message.answer("\n".join(lines), parse_mode="HTML")
 
         @router.callback_query(F.data.startswith("approve:"))
@@ -183,14 +186,16 @@ class ConfirmationBot:
             draft_id = int(callback.data.split(":", 1)[1])
             draft = await self.db.get_draft(draft_id)
             if not draft:
-                await callback.answer("Draft not found.", show_alert=True)
+                await callback.answer("Черновик не найден.", show_alert=True)
                 return
             await self.db.set_status(draft_id, "approved")
             published = await self._publish(draft)
-            await self._finalize(callback, draft_id, "✅ Approved" + (
-                " & published." if published else "."
-            ))
-            await callback.answer("Approved!")
+            await self._finalize(
+                callback,
+                draft_id,
+                "✅ Одобрено" + (" и опубликовано." if published else "."),
+            )
+            await callback.answer("Одобрено!")
 
         @router.callback_query(F.data.startswith("reject:"))
         async def cb_reject(callback: CallbackQuery) -> None:
@@ -199,8 +204,8 @@ class ConfirmationBot:
                 return
             draft_id = int(callback.data.split(":", 1)[1])
             await self.db.set_status(draft_id, "rejected")
-            await self._finalize(callback, draft_id, "❌ Rejected.")
-            await callback.answer("Rejected.")
+            await self._finalize(callback, draft_id, "❌ Отклонено.")
+            await callback.answer("Отклонено.")
 
         @router.callback_query(F.data.startswith("edit:"))
         async def cb_edit(callback: CallbackQuery) -> None:
@@ -210,7 +215,7 @@ class ConfirmationBot:
             draft_id = int(callback.data.split(":", 1)[1])
             self.awaiting_edit[callback.from_user.id] = draft_id
             await callback.message.answer(
-                f"✏️ Send me the corrected text for draft #{draft_id}."
+                f"✏️ Пришлите исправленный текст для черновика #{draft_id}."
             )
             await callback.answer()
 
@@ -220,15 +225,13 @@ class ConfirmationBot:
                 return
             draft_id = self.awaiting_edit.pop(message.from_user.id, None)
             if draft_id is None:
-                return  # not in an edit flow — ignore stray text
+                return  # не в режиме редактирования — игнорируем случайный текст
             await self.db.update_rewritten(draft_id, message.text)
             draft = await self.db.get_draft(draft_id)
             if not draft:
-                await message.answer("That draft no longer exists.")
+                await message.answer("Этого черновика больше нет.")
                 return
-            await message.answer(
-                "Updated. Here's the new version:", disable_web_page_preview=True
-            )
+            await message.answer("Обновил. Вот новая версия:")
             await message.answer(
                 _format_draft(draft, None),
                 parse_mode="HTML",
@@ -238,33 +241,33 @@ class ConfirmationBot:
 
         self.dp.include_router(router)
 
-    # --- helpers ------------------------------------------------------------
+    # --- вспомогательные методы ---------------------------------------------
 
     async def _publish(self, draft: Draft) -> bool:
-        """Publish an approved draft to the target channel. Returns success."""
+        """Опубликовать одобренный черновик в целевой канал. Возвращает успех."""
         if not self.config.target_channel:
             return False
         target = self.config.target_channel
         if target.lstrip("-").isdigit():
-            target = int(target)  # numeric channel id
+            target = int(target)  # числовой id канала
         try:
             await self.bot.send_message(
                 target, draft.rewritten, disable_web_page_preview=True
             )
             return True
         except Exception as exc:  # noqa: BLE001
-            log.exception("Failed to publish draft %s: %s", draft.id, exc)
+            log.exception("Не удалось опубликовать черновик %s: %s", draft.id, exc)
             await self.bot.send_message(
                 self.config.owner_id,
-                "⚠️ Approved, but I couldn't publish to the target channel. "
-                "Make sure the bot is an admin there with post rights.",
+                "⚠️ Одобрено, но не удалось опубликовать в целевой канал. "
+                "Убедитесь, что бот — админ канала с правом публикации.",
             )
             return False
 
     async def _finalize(
         self, callback: CallbackQuery, draft_id: int, note: str
     ) -> None:
-        """Strip the buttons and append a status line to the draft message."""
+        """Убрать кнопки и дописать статус к сообщению с черновиком."""
         try:
             original = callback.message.html_text
             await callback.message.edit_text(
@@ -272,7 +275,7 @@ class ConfirmationBot:
                 parse_mode="HTML",
                 disable_web_page_preview=True,
             )
-        except Exception:  # noqa: BLE001 - editing can fail; not critical
+        except Exception:  # noqa: BLE001 - редактирование может не удаться; не критично
             await callback.message.edit_reply_markup(reply_markup=None)
 
     async def start_polling(self) -> None:

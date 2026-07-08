@@ -54,7 +54,7 @@ class App:
         try:
             await self.bot.bot.send_message(
                 self.config.owner_id,
-                "🤖 OnTgAgent is online. Send /help to get started.",
+                "🤖 OnTgAgent запущен и на связи. Отправьте /help, чтобы начать.",
             )
         except Exception as exc:  # noqa: BLE001
             log.warning("Could not message owner on startup: %s", exc)
